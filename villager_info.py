@@ -50,7 +50,7 @@ class VillagerInfo:
 
         channels = [row[0] for row in rows]
         channels = set(channels)
-        channels.add('isabellesays')
+        channels.add(self.config['nick'])
 
         irc = IRC()
         irc.connect(self.config['server'],
@@ -118,7 +118,7 @@ class VillagerInfo:
         channels = [row[0] for row in rows]
 
         if username in channels:
-            self.irc.privmsg('isabellesays', f'I am already in your channel, {username}')
+            self.irc.privmsg(self.config['nick'], f'I am already in your channel, {username}')
             self.logger.info(f'{username} - ALREADY JOINED')
             return
 
@@ -129,7 +129,7 @@ class VillagerInfo:
         conn.close()
 
         self.irc.send(f'JOIN #{username}')
-        self.irc.privmsg('isabellesays', f'I have joined your channel, {username}')
+        self.irc.privmsg(self.config['nick'], f'I have joined your channel, {username}')
         self.logger.info(f'{username} - JOINED')
 
     def handle_remove(self, username):
@@ -143,11 +143,11 @@ class VillagerInfo:
         conn.close()
 
         self.irc.send(f'PART #{username}')
-        self.irc.privmsg('isabellesays', f'I have left your channel, @{username}')
+        self.irc.privmsg(self.config['nick'], f'I have left your channel, @{username}')
         self.logger.info(f'{username} - LEFT')
 
     def handle_help(self):
-        self.irc.privmsg('isabellesays', 'Please see the panels below for usage details!')
+        self.irc.privmsg(self.config['nick'], 'Please see the panels below for usage details!')
         self.logger.info(f'HELPED')
 
     def run_forever(self):
@@ -168,16 +168,16 @@ class VillagerInfo:
                                   int(event['tags']['tmi-sent-ts']))
 
                 elif (event['code'] == 'PRIVMSG' and
-                      event['channel'][1:] == 'isabellesays' and
+                      event['channel'][1:] == self.config['nick'] and
                       event['message'].startswith('!help')):
                     self.handle_help()
 
                 elif (event['code'] == 'PRIVMSG' and
-                      event['channel'][1:] == 'isabellesays' and
+                      event['channel'][1:] == self.config['nick'] and
                       event['message'].startswith('!join')):
                     self.handle_add(event['tags']['display-name'].lower())
 
                 elif (event['code'] == 'PRIVMSG' and
-                      event['channel'][1:] == 'isabellesays' and
+                      event['channel'][1:] == self.config['nick'] and
                       event['message'].startswith('!leave')):
                     self.handle_remove(event['tags']['display-name'].lower())
